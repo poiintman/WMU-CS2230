@@ -1,19 +1,26 @@
 #include <msp430.h>
+#include <string.h>
 #include <libemb/serial/serial.h>
 #include <libemb/conio/conio.h>
 #include <libemb/shell/shell.h>
 
 /*******************************************
-      PROTOTYPES & GLOBALS
+      PROTOTYPES
 *******************************************/
 int shell_cmd_help(shell_cmd_args *args);
 int shell_cmd_argt(shell_cmd_args *args);
+int shell_cmd_encr(shell_cmd_args *args);
+
+/*******************************************
+      GLOBALS
+*******************************************/
+char *key = "____________________";
 
 /*******************************************
       SHELL COMMANDS STRUCT
 *******************************************/
-shell_cmds my_shell_cmds = {
-  .count  = 2,
+shell_cmds commands = {
+  .count  = 3,
   .cmds = {
     {
       .cmd  = "help",
@@ -24,6 +31,11 @@ shell_cmds my_shell_cmds = {
       .cmd  = "args",
       .desc = "print back given arguments",
       .func = shell_cmd_argt
+    },
+    {
+      .cmd  = "encrypt",
+      .desc = "encrypt a string",
+      .func = shell_cmd_encr
     }
   }
 };
@@ -35,8 +47,8 @@ int shell_cmd_help(shell_cmd_args *args)
 {
   int k;
 
-  for(k = 0; k < my_shell_cmds.count; k++) {
-    cio_printf("%s: %s\n\r", my_shell_cmds.cmds[k].cmd, my_shell_cmds.cmds[k].desc);
+  for(k = 0; k < commands.count; k++) {
+    cio_printf("%s: %s\n\r", commands.cmds[k].cmd, commands.cmds[k].desc);
   }
 
   return 0;
@@ -55,9 +67,32 @@ int shell_cmd_argt(shell_cmd_args *args)
   return 0;
 }
 
+int shell_cmd_encr(shell_cmd_args *args)
+{
+  if(args->count == 0) {
+    cio_print((char *) "ERROR, no string to encrypt\n\r");
+    return -1;
+  }
+  if(strlen(args->args[0].val) > 20) {
+    cio_print((char *) "ERROR, string to encrypt is too long\n\r");
+    return -1;
+  }
+  int k;
+  char string[21];
+  strncpy(string, args->args[0].val, 20);
+
+  for(k = 0; k < strlen(string); k++) {
+    string[k] = string[k] ^ key[k];
+  }
+
+  cio_printf("encrypted string: %s\n\r", string);
+
+  return 0;
+}
+
 int shell_process(char *cmd_line)
 {
-  return shell_process_cmds(&my_shell_cmds, cmd_line);
+  return shell_process_cmds(&commands, cmd_line);
 }
 
 /*******************************************
@@ -69,11 +104,9 @@ int main(void)
   BCSCTL1 = CALBC1_1MHZ;
   DCOCTL  = CALDCO_1MHZ;
 
-  // BCSCTL3 = (BCSCTL3 & ~(BIT4+BIT5)) | LFXT1S_2;     // Disable xtal
-
   serial_init(9600);
 
-  __enable_interrupt();                     // Enable global interrupts
+  __dint();                                 // Enable global interrupts
 
 /*******************************************
       MAIN LOOP
@@ -81,7 +114,7 @@ int main(void)
   for(;;)
   {
     int j = 0;                              // Char array counter
-    char cmd_line[90] = {0};                // Init empty array
+    char cmd_line[90] = { 0 };              // Init empty array
 
     cio_print((char *) "$ ");               // Display prompt
     char c = cio_getc();                    // Wait for a character
@@ -118,12 +151,4 @@ int main(void)
   }
 
   return 0;
-}
-
-/*******************************************
-      INTERRUPTS
-*******************************************/
-#pragma vector=TIMER0_A0_VECTOR
-  __interrupt void Timer0_A0 (void) {
-
 }
