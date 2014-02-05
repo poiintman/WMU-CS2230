@@ -27,4 +27,6 @@ Some breakpoint targets are provided to you for convenience:
 	cmd_hide_loop
 	cmd_hide_end
 
-However, the assembly file is _not_ provided, so you will have to use the  commands GDB has available to examine instructions. [Here]() is some useful reading on debugger commands and there is also a very handy [cheat sheet]().
+However, the assembly file is _not_ provided, so you will have to use the  commands GDB has available to examine instructions. [Here](http://www.cs.cmu.edu/~gilpin/tutorial/) is some useful reading on debugger commands and there is also a very handy [cheat sheet](http://darkdust.net/files/GDB%20Cheat%20Sheet.pdf).
+
+The value you are searching for is an unsigned long which, on the MSP430, is a 32-bit value.
