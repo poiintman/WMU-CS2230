@@ -12,12 +12,12 @@ CFLAGS          = -mmcu=$(CPU) $(OPTIMIZATION) -Wall -g
 LIBEMB          = -lshell -lconio -lserial
 
 # Build and link executable
-$(NAME).elf: $(SOURCE)
-ifeq (,$(findstring libemb,$(shell cat $(SOURCE))))
-	msp430-gcc $(CFLAGS) -o $@ $(SOURCE)
-else
-	msp430-gcc $(CFLAGS) -o $@ $(SOURCE) $(LIBEMB)
-endif
+# $(NAME).elf: $(SOURCE)
+# ifeq (,$(findstring libemb,$(shell cat $(SOURCE))))
+# 	msp430-gcc $(CFLAGS) -o $@ $(SOURCE)
+# else
+# 	msp430-gcc $(CFLAGS) -o $@ $(SOURCE) $(LIBEMB)
+# endif
 
 # Flash to board with mspdebug
 flash: $(NAME).elf
