@@ -3,6 +3,7 @@
 	.type	nibble,@function
 nibble:
 	
+	ret
 .Lfe1:
 	.size	nibble,.Lfe1-nibble
 ;; End of function
